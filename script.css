@@ -1,0 +1,219 @@
+/* Myth or Fact? Skin brightening pills
+   Reads the statements from the #deck list in index.html, shuffles them,
+   and runs a one-card-at-a-time quiz with a score and a review screen.
+   Press M or F to answer from the keyboard. Best score stays on this device only. */
+(function () {
+  "use strict";
+
+  var deckEl = document.getElementById("deck");
+  var app = document.getElementById("quiz-app");
+  if (!deckEl || !app) return;
+
+  /* ---------- Read the deck from the page ---------- */
+  var source = Array.prototype.slice.call(deckEl.querySelectorAll("li")).map(function (li) {
+    return {
+      text: li.querySelector(".deck__q").textContent.trim(),
+      why: li.querySelector(".deck__why").textContent.trim(),
+      answer: li.getAttribute("data-answer")
+    };
+  });
+  if (!source.length) return;
+
+  /* ---------- Elements ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+  var el = {
+    count: $("q-count"), score: $("q-score"), dots: $("q-dots"),
+    play: $("q-play"), statement: $("q-statement"), choices: $("q-choices"),
+    feedback: $("q-feedback"), stamp: $("q-stamp"), verdict: $("q-verdict"),
+    explain: $("q-explain"), next: $("q-next"),
+    end: $("q-end"), final: $("q-final"), message: $("q-message"),
+    review: $("q-review"), again: $("q-again"), best: $("q-best")
+  };
+  var buttons = Array.prototype.slice.call(el.choices.querySelectorAll("button"));
+
+  /* ---------- State ---------- */
+  var BEST_KEY = "bpq:best";
+  var deck = [];
+  var index = 0;
+  var score = 0;
+  var results = [];
+  var answered = false;
+
+  function readBest() {
+    try {
+      var n = parseInt(window.localStorage.getItem(BEST_KEY), 10);
+      return isNaN(n) ? null : n;
+    } catch (e) { return null; }
+  }
+  function writeBest(n) {
+    try { window.localStorage.setItem(BEST_KEY, String(n)); } catch (e) { /* storage unavailable */ }
+  }
+
+  function shuffle(list) {
+    var a = list.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function label(answer) { return answer === "myth" ? "Myth" : "Fact"; }
+
+  /* ---------- Rendering ---------- */
+  function renderDots() {
+    el.dots.innerHTML = "";
+    deck.forEach(function () { el.dots.appendChild(document.createElement("span")); });
+  }
+
+  function paintDots() {
+    Array.prototype.forEach.call(el.dots.children, function (dot, i) {
+      dot.className = "";
+      if (results[i]) dot.className = results[i].right ? "is-right" : "is-wrong";
+      else if (i === index) dot.className = "is-current";
+    });
+  }
+
+  function showCard() {
+    var card = deck[index];
+    answered = false;
+
+    el.count.textContent = "Card " + (index + 1) + " of " + deck.length;
+    el.score.textContent = "Score: " + score;
+    el.statement.textContent = card.text;
+
+    buttons.forEach(function (b) {
+      b.disabled = false;
+      b.classList.remove("is-picked", "is-correct");
+    });
+    el.feedback.hidden = true;
+    paintDots();
+  }
+
+  function answer(choice) {
+    if (answered) return;
+    answered = true;
+
+    var card = deck[index];
+    var right = choice === card.answer;
+    if (right) score += 1;
+    results[index] = { right: right, picked: choice };
+
+    buttons.forEach(function (b) {
+      b.disabled = true;
+      var value = b.getAttribute("data-answer");
+      if (value === choice) b.classList.add("is-picked");
+      if (value === card.answer) b.classList.add("is-correct");
+    });
+
+    el.stamp.className = "stamp is-" + card.answer;
+    el.stamp.textContent = label(card.answer) + ".";
+    el.verdict.textContent = right ? "You got it." : "Not quite. You picked " + label(choice).toLowerCase() + ".";
+    el.explain.textContent = card.why;
+    el.next.textContent = index === deck.length - 1 ? "See my result" : "Next statement";
+    el.feedback.hidden = false;
+
+    el.score.textContent = "Score: " + score;
+    paintDots();
+    el.next.focus({ preventScroll: false });
+  }
+
+  function endMessage(n, total) {
+    var ratio = n / total;
+    if (ratio === 1) return "A perfect score. You can spot a brightening myth from a long way off.";
+    if (ratio >= 0.75) return "A strong result. A couple of these are easy to mix up.";
+    if (ratio >= 0.5) return "A fair start. The explanations are worth another read.";
+    return "Plenty to take away here, which is the point. Play again and see how it goes.";
+  }
+
+  function showEnd() {
+    el.play.hidden = true;
+    el.dots.hidden = false;
+    el.end.hidden = false;
+
+    el.count.textContent = "Finished";
+    el.score.textContent = "Score: " + score;
+    el.final.textContent = "You got " + score + " of " + deck.length;
+    el.message.textContent = endMessage(score, deck.length);
+
+    el.review.innerHTML = "";
+    deck.forEach(function (card, i) {
+      var li = document.createElement("li");
+      var mark = document.createElement("span");
+      var text = document.createElement("span");
+      var strong = document.createElement("b");
+
+      mark.className = "review__mark " + (results[i].right ? "is-right" : "is-wrong");
+      mark.textContent = results[i].right ? "Right" : "Missed";
+
+      strong.textContent = card.text;
+      text.className = "review__text";
+      text.appendChild(strong);
+      text.appendChild(document.createTextNode("Answer: " + label(card.answer)));
+
+      li.appendChild(mark);
+      li.appendChild(text);
+      el.review.appendChild(li);
+    });
+
+    var previous = readBest();
+    if (previous === null || score > previous) {
+      writeBest(score);
+      el.best.textContent = previous === null ? "Best score saved on this device." : "New best score: " + score + " of " + deck.length + ".";
+    } else {
+      el.best.textContent = "Best score: " + previous + " of " + deck.length + ".";
+    }
+
+    paintDots();
+    el.final.setAttribute("tabindex", "-1");
+    el.final.focus();
+  }
+
+  function start() {
+    deck = shuffle(source);
+    index = 0;
+    score = 0;
+    results = [];
+    answered = false;
+
+    el.end.hidden = true;
+    el.play.hidden = false;
+    renderDots();
+    showCard();
+  }
+
+  /* ---------- Events ---------- */
+  buttons.forEach(function (b) {
+    b.addEventListener("click", function () { answer(b.getAttribute("data-answer")); });
+  });
+
+  el.next.addEventListener("click", function () {
+    if (index === deck.length - 1) {
+      showEnd();
+    } else {
+      index += 1;
+      showCard();
+      el.statement.setAttribute("tabindex", "-1");
+      el.statement.focus({ preventScroll: true });
+    }
+  });
+
+  el.again.addEventListener("click", function () {
+    start();
+    app.scrollIntoView({ block: "nearest" });
+    el.statement.setAttribute("tabindex", "-1");
+    el.statement.focus({ preventScroll: true });
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (el.play.hidden || answered) return;
+    var key = event.key.toLowerCase();
+    if (key === "m") answer("myth");
+    if (key === "f") answer("fact");
+  });
+
+  /* ---------- Go ---------- */
+  app.hidden = false;
+  start();
+})();
