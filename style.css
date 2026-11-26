@@ -1,0 +1,218 @@
+/* ==========================================================================
+   Myth or Fact? Skin brightening pills
+   Two verdict colors do the real work: coral for myth, teal for fact.
+   ========================================================================== */
+:root {
+  --ink: #1b1b2f;
+  --ink-soft: #4a4a63;
+  --page: #f2f0fa;
+  --card: #ffffff;
+  --line: #dcd8ee;
+
+  --myth: #e5483b;
+  --myth-ink: #b3301f;
+  --myth-tint: #fde7e4;
+  --fact: #0b7d6e;
+  --fact-ink: #07645a;
+  --fact-tint: #dcf2ee;
+  --sun: #ffd166;
+
+  --font-head: "Unbounded", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  --wrap: 1080px;
+  --radius: 22px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 20px; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+h1, h2 { font-family: var(--font-head); font-weight: 700; line-height: 1.15; margin: 0; text-wrap: balance; }
+p { margin: 0 0 1em; }
+
+a { color: var(--ink); text-decoration-thickness: 2px; text-underline-offset: 3px; text-decoration-color: var(--myth); }
+a:hover { color: var(--myth-ink); }
+
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+
+.wrap { width: min(100% - 40px, var(--wrap)); margin-inline: auto; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.skip-link {
+  position: absolute; left: 16px; top: -64px; z-index: 100;
+  background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 8px;
+}
+.skip-link:focus { top: 12px; }
+
+/* Top bar ---------------------------------------------------------------- */
+.bar { background: var(--ink); color: #fff; }
+.bar__inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 54px; }
+.bar__name { font-family: var(--font-head); font-weight: 700; font-size: 0.95rem; }
+.bar__note { color: #b8b8d4; font-size: 0.92rem; }
+
+/* Buttons ---------------------------------------------------------------- */
+.btn {
+  display: inline-block; cursor: pointer; text-decoration: none;
+  font: inherit; font-weight: 700; font-size: 1rem;
+  padding: 14px 26px; border: 0; border-radius: 999px;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.btn--dark { background: var(--sun); color: var(--ink); }
+.btn--dark:hover { background: #ffdf8f; color: var(--ink); }
+.btn:active { transform: translateY(1px); }
+
+/* Hero ------------------------------------------------------------------- */
+.hero { background: var(--ink); color: #fff; padding: 32px 0 96px; }
+.hero__inner { display: grid; gap: 36px; align-items: center; grid-template-columns: 1fr; }
+.hero h1 { font-size: clamp(2rem, 4.6vw, 3.3rem); letter-spacing: -0.02em; margin-bottom: 18px; }
+.hero__dek { max-width: 30em; color: #d8d8ee; font-size: 1.15rem; margin-bottom: 26px; }
+.hero__figure { margin: 0; }
+.hero__figure img { width: 100%; border-radius: var(--radius); box-shadow: 0 28px 56px -28px rgba(0, 0, 0, 0.7); }
+
+@media (min-width: 900px) {
+  .hero { padding: 48px 0 112px; }
+  .hero__inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 56px; }
+}
+
+/* Quiz card -------------------------------------------------------------- */
+.quiz-wrap { margin-top: -64px; position: relative; }
+
+.quiz, .deck {
+  max-width: 44rem; margin-inline: auto;
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: 0 24px 60px -30px rgba(27, 27, 47, 0.45);
+}
+.quiz { padding: 26px 24px 28px; }
+
+.quiz__top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; font-weight: 700; }
+.quiz__top p { margin: 0; }
+.quiz__score { color: var(--ink-soft); }
+
+.dots { display: flex; gap: 6px; margin-bottom: 26px; }
+.dots span { flex: 1; height: 8px; border-radius: 999px; background: var(--line); transition: background-color 0.3s ease; }
+.dots span.is-current { background: var(--ink); }
+.dots span.is-right { background: var(--fact); }
+.dots span.is-wrong { background: var(--myth); }
+
+.quiz__label { margin: 0 0 8px; font-weight: 600; color: var(--ink-soft); }
+
+.quiz__statement {
+  margin: 0 0 26px; min-height: 4.4em;
+  font-family: var(--font-head); font-weight: 500;
+  font-size: clamp(1.25rem, 3vw, 1.7rem); line-height: 1.3; letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+/* Choices ---------------------------------------------------------------- */
+.choices { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+.choice {
+  font-family: var(--font-head); font-weight: 900; font-size: clamp(1.2rem, 3vw, 1.6rem);
+  padding: 22px 12px; border-radius: 18px; cursor: pointer;
+  border: 3px solid transparent;
+  transition: transform 0.15s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+}
+.choice--myth { background: var(--myth-tint); color: var(--myth-ink); border-color: var(--myth); }
+.choice--fact { background: var(--fact-tint); color: var(--fact-ink); border-color: var(--fact); }
+.choice:hover:not(:disabled) { transform: translateY(-2px); }
+.choice:active:not(:disabled) { transform: translateY(1px); }
+
+.choice:disabled { cursor: default; opacity: 0.4; }
+.choice.is-picked, .choice.is-correct { opacity: 1; }
+.choice.is-correct { box-shadow: 0 0 0 4px var(--card), 0 0 0 7px currentColor; }
+
+/* Feedback --------------------------------------------------------------- */
+.feedback { margin-top: 26px; padding-top: 22px; border-top: 2px dashed var(--line); }
+.feedback[hidden] { display: none; }
+
+.stamp {
+  display: inline-block; margin: 0 0 10px; padding: 4px 16px 6px;
+  font-family: var(--font-head); font-weight: 900; font-size: 1.9rem; line-height: 1.2;
+  border: 4px solid currentColor; border-radius: 12px; transform: rotate(-3deg);
+  animation: stamp-in 0.28s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+.stamp.is-myth { color: var(--myth-ink); }
+.stamp.is-fact { color: var(--fact-ink); }
+
+@keyframes stamp-in {
+  from { transform: rotate(-3deg) scale(1.6); opacity: 0; }
+  to { transform: rotate(-3deg) scale(1); opacity: 1; }
+}
+
+.feedback__verdict { margin: 0 0 6px; font-weight: 700; font-size: 1.1rem; }
+.feedback__why { margin: 0 0 20px; color: var(--ink-soft); }
+
+/* End screen ------------------------------------------------------------- */
+.end[hidden] { display: none; }
+.end__score { margin: 0 0 6px; font-family: var(--font-head); font-weight: 900; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.1; }
+.end__message { margin: 0 0 22px; color: var(--ink-soft); font-size: 1.1rem; }
+
+.review { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 8px; }
+.review li { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; padding: 12px 14px; border-radius: 14px; background: var(--page); }
+.review__mark { display: inline-block; min-width: 4.6rem; padding: 2px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 700; text-align: center; }
+.review__mark.is-right { background: var(--fact-tint); color: var(--fact-ink); }
+.review__mark.is-wrong { background: var(--myth-tint); color: var(--myth-ink); }
+.review__text { font-size: 0.98rem; line-height: 1.45; }
+.review__text b { display: block; font-weight: 700; }
+
+.end__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.end__best { margin: 0; color: var(--ink-soft); font-weight: 600; }
+
+/* No-JS fallback list ---------------------------------------------------- */
+.deck { margin-block: 0; padding: 24px 24px 24px 48px; }
+.deck li { margin-bottom: 18px; padding-left: 6px; }
+.deck li::marker { font-weight: 700; }
+.deck__q { margin: 0 0 4px; font-weight: 700; }
+.deck__why { margin: 0; color: var(--ink-soft); }
+.deck li::before { content: attr(data-answer); display: inline-block; margin: 0 0 4px -6px; padding: 1px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
+.deck li[data-answer="myth"]::before { background: var(--myth-tint); color: var(--myth-ink); }
+.deck li[data-answer="fact"]::before { background: var(--fact-tint); color: var(--fact-ink); }
+.js .deck { display: none; }
+.noscript { max-width: 44rem; margin: 16px auto 0; color: var(--ink-soft); }
+
+/* Sources ---------------------------------------------------------------- */
+.sources { max-width: 46rem; margin-top: 56px; margin-inline: auto; width: min(100% - 40px, 46rem); }
+.sources h2 { font-size: 1.5rem; margin-bottom: 14px; }
+
+.disclosure {
+  margin-top: 28px; padding: 14px 18px;
+  border-left: 5px solid var(--sun); background: #fff; border-radius: 0 14px 14px 0; font-size: 0.98rem;
+}
+.disclosure p { margin: 0; }
+
+.foot { margin-top: 56px; padding: 32px 0 48px; background: var(--ink); color: #b8b8d4; }
+.foot p { margin: 0; max-width: 56rem; font-size: 0.9rem; line-height: 1.6; }
+
+/* Small screens, motion, print ------------------------------------------- */
+@media (max-width: 480px) {
+  .quiz { padding: 20px 16px 22px; }
+  .bar__note { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+@media print {
+  .bar, .hero__figure, .btn { display: none; }
+  .hero, .foot { background: none; color: var(--ink); }
+  .hero h1, .hero__dek, .foot p { color: var(--ink); }
+  .js .deck { display: block; }
+  .quiz { display: none; }
+}
